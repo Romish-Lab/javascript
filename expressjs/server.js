@@ -33,7 +33,6 @@ app.get("/", (req, res) => {
   res.send("<h1>homepage</h1>");
 });
 //* read
-
 app.get("/users", (req, res) => {
   res.json([
     {
