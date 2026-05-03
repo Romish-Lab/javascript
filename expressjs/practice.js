@@ -31,7 +31,7 @@ app.get("/user", (req, res) => {
 
 //! user
 //* create
-app.post("/user", (req, res) => {
+app.post("/user", (req, res) => {  //! /user is a route
   res.send("user created successfully");
 });
 
