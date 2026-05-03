@@ -46,8 +46,11 @@ app.get("/users", (req, res) => {
 // /users/1
 //* params
 app.get("/users/:id", (req, res) => {
+  console.log(req.params)
+  const id= req.params.id
   res.json([
     {
+      id:id,
       name: "john1",
       age: 19,
       email: "john@gmail.com",
