@@ -29,33 +29,54 @@ const PORT = 8080;
 
 const app = express();
 
+//  IMPORTANT (for req.body)
+app.use(express.json());
+
+let users = [
+  {
+    id: 1,
+    name: "john",
+    email: "john@gmail.com",
+    password: 12345,
+  },
+  {
+    id: 2,
+    name: "bihari",
+    email: "bihari@gmail.com",
+    password: 12345,
+  },
+  {
+    id: 3,
+    name: "bahun",
+    email: "bahun@gmail.com",
+    password: "qwerty1234",
+  },
+];
+
+
+
 app.get("/", (req, res) => {
   res.send("<h1>homepage</h1>");
 });
+
 //* read
 app.get("/users", (req, res) => {
-  res.json([
-    {
-      name: "john",
-      age: 19,
-      email: "john@gmail.com",
-    },
-  ]);
+  res.status(200).json(users);
 });
 
 // /users/1
 //* params
 app.get("/users/:id", (req, res) => {
-  console.log(req.params)
-  const id= req.params.id
-  res.json([
-    {
-      id:id,
-      name: "john1",
-      age: 19,
-      email: "john@gmail.com",
-    },
-  ]);
+  console.log(req.params);
+  const id = req.params.id;
+
+  const user = users.find((user) => user.id == id);
+  console.log(user);
+  if (!user) {
+    return res.status(404).json({ message: "user not found" });
+  }
+
+  res.json(user);
 });
 
 app.get("/products", (req, res) => {
@@ -86,30 +107,44 @@ app.get("/categories", (req, res) => {
     },
   ]);
 });
+
 //! create
 app.post("/users", (req, res) => {
-  res.json([
-    {
-      message: "user created",
-    },
-  ]);
+  // req.body={name:"",email:"", pass:""}
+  // db operation.
+  const newUser = {
+    id: users.length + 1,
+    ...req.body,
+  };
+
+  users.push(newUser);
+
+  res.json(newUser);
 });
 
 //! update
 
 app.put("/users", (req, res) => {
-  res.json([
-    {
-      message: "user updated",
-    },
-  ]);
+  // req.body=>{}
+  users = users.map((user) => ({
+    ...user,
+    ...req.body,
+  }));
+
+  res.status(200).json({
+    message: "user updated",
+    users,
+  });
 });
 
 app.delete("/users", (req, res) => {
-  res.json({
+  users = [];
+
+  res.status(200).json({
     message: "user deleted",
   });
 });
+
 //! start server
 app.listen(PORT, () => {
   console.log(`server is running at http://localhost:${PORT}`);
@@ -166,5 +201,13 @@ app.listen(PORT, () => {
 // http:// localhose:/users?name=john
 // * route params=>
 
-  //? users/1=> /users/:id=> req.params={id:1}
-   //? users/1000=> /users/:id=> req.params={xyz:1000}
+//? users/1=> /users/:id=> req.params={id:1}
+//? users/1000=> /users/:id=> req.params={xyz:1000}
+
+//! req.header=>Headers are extra information sent with a request.
+//! req.query=>
+//! req.params=>
+//! req.body=>
+
+//! res.json=>
+//! res.status(status code)
