@@ -1,120 +1,160 @@
-
-const User=require("../model/user.model")
-let user = [
-  {
-    id: 1,
-    name: "john",
-    email: "john@gmail.com",
-    password: 12345,
-  },
-  {
-    id: 2,
-    name: "bihari",
-    email: "bihari@gmail.com",
-    password: 12345,
-  },
-];
-
-
+const User = require("../model/user.model");
 
 //! creating model (collection)
- // mongoose always create the model with prural name
+// mongoose always creates the model with plural name
+
 //* GET all users
 exports.getuser = async (req, res) => {
   try {
     const user = await User.find({});
-    // console.log(user)
+
     res.status(200).json({
       message: "all users fetched successfully",
       data: user,
     });
   } catch (error) {
-    // console.log(user)
     res.status(500).json({
-      message: "something went wrong",
+      message: error.message || "something went wrong",
       data: null,
     });
   }
 };
 
 //* GET user by ID
-exports.getuserbyid = (req, res) => {
-  const id = parseInt(req.params.id);
+exports.getuserbyid = async (req, res) => {
+  try {
+    const id = req.params.id;
+    // const user=await User.findOne({_id:id})//* it never returns array
+    const user = await User.findById(id);
 
-  const foundUser = user.find((u) => u.id === id);
+    if (!user) {
+      return res.status(404).json({
+        message: "user not found",
+        data: null,
+      });
+    }
 
-  if (!foundUser) {
-    return res.status(404).json({ message: "User not found" });
+    res.status(200).json({
+      message: "user fetched successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message || "something went wrong",
+      data: null,
+    });
   }
-
-  res.json(foundUser);
 };
 
-
 //* CREATE user
-exports.postuser =async (req, res) => {
-  try{
-    // const newuser = {
-    // id: user.length + 1,
-    // ...req.body,
-  // };
-const {name,email,password,phone}=req.body;
-const user=await User.create({
-  name,
-  email,
-  password,
-  phone,
-})
-  // user.push(newuser);
+exports.postuser = async (req, res) => {
+  try {
+    //! /user is a route
+    console.log("CREATING NEW USER");
 
-  res.status(201).json({
-    message: "User created successfully",
-    data: User,
-  });
-  }
-  catch(error){
+    const { name, email, password, phone } = req.body;
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+    });
+
+    console.log(user);
+
+    res.status(201).json({
+      message: "user created successfully",
+      data: user,
+    });
+  } catch (error) {
     res.status(500).json({
-      message:"something went wrong"
-    })
+      message: error.message || "something went wrong",
+      data: null,
+    });
   }
 };
 
 //* UPDATE user
-exports.updateuser = (req, res) => {
-  const id = parseInt(req.params.id);
+exports.updateuser = async (req, res) => {
+  try {
+    const id = req.params.id;
 
-  const index = user.findIndex((u) => u.id === id);
+    const { name, email, password, phone } = req.body;
 
-  if (index === -1) {
-    return res.status(404).json({ message: "User not found" });
+    const user = await User.findOne({ _id: id });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "user not found",
+        data: null,
+      });
+    }
+
+    if (name) {
+      user.name = name;
+    }
+
+    if (email) {
+      user.email = email;
+    }
+
+    if (password) {
+      user.password = password;
+    }
+
+    if (phone) {
+      user.phone = phone;
+    }
+    //! save user
+    const updatedUser = await user.save();
+
+    // const updatedUser = await User.findByIdAndUpdate(
+    //   id,
+    //   req.body,
+    //   {
+    //     new: true,
+    //   }
+    // );
+
+    res.status(200).json({
+      message: "user updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message || "something went wrong",
+      data: null,
+    });
   }
-
-  user[index] = {
-    ...user[index],
-    ...req.body,
-  };
-
-  res.json({
-    message: "User updated successfully",
-    data: user[index],
-  });
 };
 
 //* DELETE user
 exports.deleteuser = (req, res) => {
-  const id = parseInt(req.params.id);
+  //1. User.findByIdAndDelete(id)
 
-  const index = user.findIndex((u) => u.id === id);
+  //2.
+  //const user =  await User.findOne({_id:id})
+  // await user.deleteOne()
+
+  const { id } = req.params;
+
+  const index = users.findIndex(
+    (user) => user._id.toString() === id.toString(),
+  );
 
   if (index === -1) {
-    return res.status(404).json({ message: "User not found" });
+    res.status(404).json({
+      message: "User not found",
+      data: null,
+    });
+    return;
   }
 
-  const deletedUser = user.splice(index, 1);
+  users.splice(index, 1);
 
-  res.json({
-    message: "User deleted successfully",
-    data: deletedUser,
+  res.status(200).json({
+    message: "User Deleted",
+    data: null,
   });
 };
-

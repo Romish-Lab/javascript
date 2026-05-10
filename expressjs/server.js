@@ -27,6 +27,7 @@ const PORT = 8080;
 //! express setup
 //* rest api => GET, POST, PUT/PATCH, DELETE
 
+
 const app = express();
 
 //  IMPORTANT (for req.body)
@@ -52,8 +53,6 @@ let users = [
     password: "qwerty1234",
   },
 ];
-
-
 
 app.get("/", (req, res) => {
   res.send("<h1>homepage</h1>");
@@ -211,3 +210,19 @@ app.listen(PORT, () => {
 
 //! res.json=>
 //! res.status(status code)
+
+//* middleware
+//!=> is a function which has access to req object, res object and  middleware next function(next)
+//! and is executed between req-res cycle
+
+//? can execute any code/logic
+//? can end req-res cycle
+//? can modify req and res object
+//? can pass the control to next middleware stack
+
+//* Types
+//! application level
+//! route level
+//! error handler
+//! in built middleware
+//! third party middleware
