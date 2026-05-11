@@ -220,9 +220,11 @@ app.listen(PORT, () => {
 //? can modify req and res object
 //? can pass the control to next middleware stack
 
+// req=>mid=>mid=>mid=> controller=>res
 //* Types
 //! application level
 //! route level
-//! error handler
+//! error handler=>(error,req,res,next)=>{}
 //! in built middleware
 //! third party middleware
+

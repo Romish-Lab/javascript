@@ -4,7 +4,7 @@ const User = require("../model/user.model");
 // mongoose always creates the model with plural name
 
 //* GET all users
-exports.getuser = async (req, res) => {
+exports.getuser = async (req, res, next) => {
   try {
     const user = await User.find({});
 
@@ -13,24 +13,25 @@ exports.getuser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
+    next({
+      statusCode: 500,
       message: error.message || "something went wrong",
-      data: null,
     });
   }
 };
 
 //* GET user by ID
-exports.getuserbyid = async (req, res) => {
+exports.getuserbyid = async (req, res, next) => {
   try {
     const id = req.params.id;
+
     // const user=await User.findOne({_id:id})//* it never returns array
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({
+      return next({
+        statusCode: 404,
         message: "user not found",
-        data: null,
       });
     }
 
@@ -39,20 +40,42 @@ exports.getuserbyid = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
+    next({
+      statusCode: 500,
       message: error.message || "something went wrong",
-      data: null,
     });
   }
 };
 
 //* CREATE user
-exports.postuser = async (req, res) => {
+exports.postuser = async (req, res, next) => {
   try {
     //! /user is a route
     console.log("CREATING NEW USER");
 
     const { name, email, password, phone } = req.body;
+
+    //! validation
+    if (!name) {
+      return next({
+        statusCode: 400,
+        message: "name is required",
+      });
+    }
+
+    if (!email) {
+      return next({
+        statusCode: 400,
+        message: "email is required",
+      });
+    }
+
+    if (!password) {
+      return next({
+        statusCode: 400,
+        message: "password is required",
+      });
+    }
 
     const user = await User.create({
       name,
@@ -68,15 +91,15 @@ exports.postuser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
+    next({
+      statusCode: 500,
       message: error.message || "something went wrong",
-      data: null,
     });
   }
 };
 
 //* UPDATE user
-exports.updateuser = async (req, res) => {
+exports.updateuser = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -85,9 +108,9 @@ exports.updateuser = async (req, res) => {
     const user = await User.findOne({ _id: id });
 
     if (!user) {
-      return res.status(404).json({
+      return next({
+        statusCode: 404,
         message: "user not found",
-        data: null,
       });
     }
 
@@ -106,6 +129,7 @@ exports.updateuser = async (req, res) => {
     if (phone) {
       user.phone = phone;
     }
+
     //! save user
     const updatedUser = await user.save();
 
@@ -122,39 +146,43 @@ exports.updateuser = async (req, res) => {
       data: updatedUser,
     });
   } catch (error) {
-    res.status(500).json({
+    next({
+      statusCode: 500,
       message: error.message || "something went wrong",
-      data: null,
     });
   }
 };
 
 //* DELETE user
-exports.deleteuser = (req, res) => {
-  //1. User.findByIdAndDelete(id)
+exports.deleteuser = async (req, res, next) => {
+  try {
+    //1. User.findByIdAndDelete(id)
 
-  //2.
-  //const user =  await User.findOne({_id:id})
-  // await user.deleteOne()
+    //2.
+    //const user =  await User.findOne({_id:id})
+    // await user.deleteOne()
 
-  const { id } = req.params;
+    const { id } = req.params;
 
-  const index = users.findIndex(
-    (user) => user._id.toString() === id.toString(),
-  );
+    const user = await User.findById(id);
 
-  if (index === -1) {
-    res.status(404).json({
-      message: "User not found",
+    if (!user) {
+      return next({
+        statusCode: 404,
+        message: "user not found",
+      });
+    }
+
+    await user.deleteOne();
+
+    res.status(200).json({
+      message: "User Deleted",
       data: null,
     });
-    return;
+  } catch (error) {
+    next({
+      statusCode: 500,
+      message: error.message || "something went wrong",
+    });
   }
-
-  users.splice(index, 1);
-
-  res.status(200).json({
-    message: "User Deleted",
-    data: null,
-  });
 };
